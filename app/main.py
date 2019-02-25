@@ -5,6 +5,13 @@ import bottle
 
 from api import ping_response, start_response, move_response, end_response
 
+from snake import Snake
+from board import Board
+from constants import Constants
+
+bord = Board()
+snek = Snake(bord)
+
 @bottle.route('/')
 def index():
     return '''
@@ -39,7 +46,8 @@ def start():
             initialize your snake state here using the
             request's data if necessary.
     """
-    print(json.dumps(data))
+    # create snake and game board
+    bord.set_dimensions(data["board"]["width"], data["board"]['height'])
 
     color = "#00FF00"
 
@@ -54,10 +62,11 @@ def move():
     TODO: Using the data from the endpoint request object, your
             snake AI must choose a direction to move in.
     """
-    print(json.dumps(data))
 
-    directions = ['up', 'down', 'left', 'right']
-    direction = random.choice(directions)
+    bord.update(data["board"]["food"], data["board"]["snakes"])
+    snek.update(data["you"]["body"], data["you"]["health"])
+
+    direction = snek.move()
 
     return move_response(direction)
 
@@ -70,7 +79,6 @@ def end():
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
     """
-    print(json.dumps(data))
 
     return end_response()
 
@@ -81,6 +89,6 @@ if __name__ == '__main__':
     bottle.run(
         application,
         host=os.getenv('IP', '0.0.0.0'),
-        port=os.getenv('PORT', '8080'),
-        debug=os.getenv('DEBUG', True)
+        port=os.getenv('PORT', '8080')#,
+        #debug=os.getenv('DEBUG', True)
     )
