@@ -4,6 +4,7 @@ from constants import Constants
 class Snake:
     def __init__(self, board_reference):
         self.body = []
+        self.length = 3
         self.health = -1
         self.state = "grow"
 
@@ -13,6 +14,7 @@ class Snake:
         """ Keeps snake info updated every loop. Currently, body stores positional dictionary """
 
         self.body = body
+        self.length = len(self.body)
         self.health = health
         self.state = state
 
@@ -22,8 +24,16 @@ class Snake:
             Based off of the current state, suitable methods will be called and analysed to \
                 determine the best path possible
         """
-        next_path = self.__board.get_next_move(self.get_head())
+        
+
+        next_path = self.__board.get_next_move(self)
+        # next_area = self.__board.count_connected_comps(next_path[1])
         next_move = next_path[1] - next_path[0]
+        # if next_area < self.length:
+        #     next_move = (-next_move[0], -next_move[1])
+
+        # if self.__board.is_position_in(next_move, self.__board.avoid):
+        #     print("TIME TO DIE")
         next_vector = Constants.VECTORS[next_move]
 
         return next_vector
@@ -36,6 +46,12 @@ class Snake:
 
     def get_tail(self):
         return self.body[1:]
+
+    def get_tailend(self):
+        return self.body[-1]
+
+    def get_health(self):
+        return self.health
 
 def main():
     data = {

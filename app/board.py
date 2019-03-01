@@ -11,6 +11,9 @@ class Cell:
         return "[{}, {}]".format(self.x, self.y)
 
     def __eq__(self, other):
+        if not other:
+            print("ERROR")
+            return False
         return self.x == other.x and self.y == other.y
 
     def __sub__(self, other):
@@ -39,11 +42,12 @@ class Board:
         self.dimensions = (20, 20)
         self.food_list = []
         self.avoid = []
+        self.enemies = []
 
     def set_dimensions(self, width, height):
         self.dimensions = (width, height)
 
-    def update(self, foods, enemies):
+    def update(self, foods, enemies, me_head):
         del self.food_list[:]
         del self.avoid[:]
 
@@ -51,6 +55,13 @@ class Board:
             self.food_list.append(Cell(food["x"], food["y"]))
 
         for enemy in enemies:
+            if enemy in self.enemies or enemy["health"] == 0:
+                continue
+
+            if not  enemy["body"][0]["x"] == me_head["x"] and \
+                    enemy["body"][0]["y"] == me_head["y"]:
+                self.enemies.append(enemy)
+
             for body in enemy["body"]:
                 self.avoid.append(Cell(body["x"], body["y"]))
 
@@ -66,19 +77,61 @@ class Board:
 
         return closest_food
 
+    def pos_is_sate(self, dest):
+        min_enemydist = 400
+        for enemy in self.enemies:
+            enemy_head = Cell(enemy["body"][0]["x"], enemy["body"][0]["y"])
+            enemy_dist = enemy_head.man_distance(dest)
+            if enemy_dist < min_enemydist:
+                min_enemydist = enemy_dist
 
-    def get_next_move(self, snake_head):
+        if self.current_head.man_distance(dest) < min_enemydist:
+            return True
+        else:
+            print("Nothing is safe")
+            return False
+
+    def get_next_move(self, snake):
+
         food_available = self.food_list[:]
-        head = Cell(snake_head["x"], snake_head["y"])
+        head = Cell(snake.get_head()["x"], snake.get_head()["y"])
+        self.current_head = head
+
+        tailend = Cell(snake.get_tailend()["x"], snake.get_tailend()["y"])
+        self.avoid.remove(tailend)
+
         closest_food = self.__get_closest_food(head, food_available)
 
-        astar_path = self.astar(head, closest_food, self.avoid)
-        while not astar_path:
-            food_available.remove(closest_food)
-            closest_food = self.__get_closest_food(head, food_available)
-            astar_path = self.astar(head, closest_food, self.avoid)
+        if snake.length <= 10: #and food is reachable and safe
+            action = "eat"
+        else:
+            if snake.health > 50:
+                action = "surround"
+            elif self.pos_is_sate(closest_food):
+                action = "eat"
+            else:
+                action = "surround"
+
+        if action == "eat":
+            astar_path = self.astar(head, closest_food)
+
+            while not astar_path:
+                if not food_available:
+                    print("PULLING TAIL")
+                    astar_path = self.astar(head, tailend)
+                else:
+                    food_available.remove(closest_food)
+                    closest_food = self.__get_closest_food(head, food_available)
+                    astar_path = self.astar(head, closest_food)
+
+        elif action == "surround":
+            astar_path = self.astar(head, tailend)
 
         return astar_path
+
+    """
+        ASTAR
+    """
 
     def __get_lowest_f(self, cell_list):
         min_cell = cell_list[0]
@@ -100,7 +153,10 @@ class Board:
 
         return return_list[::-1]
 
-    def astar(self, start, end, avoid):
+    def astar(self, start, end):
+        if not end:
+            return None
+
         #start by adding the original position to the open list
         open_list = [start]
         closed_list = []
@@ -114,12 +170,14 @@ class Board:
             #remove it fro the open list
             open_list.remove(current)
             #if we added the destination to the closed list, we've found a path
+            
             if current == end:
                 #break the loop
                 return self.__reconstruct_path(current, start)
+                
             #retrieve all its walkable neighbours
             #for all neighbours:
-            for neighbour in current.get_neighbours(avoid, self.dimensions):
+            for neighbour in current.get_neighbours(self.avoid, self.dimensions):
                 #if the neighbour is already in the closed list, skip it
                 if neighbour in closed_list:
                     continue
@@ -144,31 +202,62 @@ class Board:
                 neighbour.g = current.g + 1
                 neighbour.h = neighbour.eu_distance(end)
                 neighbour.f = neighbour.g + neighbour.h
+
+    """
+        FLOOD FILL
+    """
+    def count_connected_comps(self, future_head):
+        visited = []
+        num_connected = 0
         
-def main():
-    board = {
-    "food": [{"y": 12, "x": 9}, {"y": 5, "x": 2}, {"y": 13, "x": 7}, {"y": 0, "x": 10}, {"y": 13, "x": 6}, {"y": 14, "x": 7}, {"y": 9, "x": 4}, {"y": 4, "x": 10}, {"y": 3, "x": 13}, {"y": 14, "x": 4}],
+        for n in future_head.get_neighbours(self.avoid+[self.current_head], self.dimensions):
+            if n not in visited:
+                num_connected = self.__DFS(-1, n, visited)
 
-    "width": 15,
+        return num_connected
 
-    "snakes":
-    [
-    {"body": [{"y": 6, "x": 11}, {"y": 6, "x": 12}, {"y": 7, "x": 12}],
-    "health": 98, "id": "71bc0613-00f6-4e6e-be72-4d84d19e568f",
-    "name": ""}
-    ],
 
-    "height": 15
-    }
+    def __DFS(self, count, cell, visited):
+        visited.append(cell)
+        count += 1
 
-    board_object = Board()
-    board_object.set_dimensions(board["width"], board["height"])
-    board_object.update(board["food"], board["snakes"])
+        for n in cell.get_neighbours(self.avoid+[self.current_head], self.dimensions):
+            if n not in visited:
+                count = self.__DFS(count, n, visited)
+        return count
 
-    path = board_object.astar({"y": 2, "x": 3}, board_object.food_list[1], board_object.avoid)
 
-    for p in path:
-        print(p)
+        
+# def main():
+#     board = {
+#     "food": [{"y": 12, "x": 9}, {"y": 5, "x": 2}, {"y": 13, "x": 7}, {"y": 0, "x": 10}, {"y": 13, "x": 6}, {"y": 14, "x": 7}, {"y": 9, "x": 4}, {"y": 4, "x": 10}, {"y": 3, "x": 13}, {"y": 14, "x": 4}],
 
-if __name__ == "__main__":
-    main()
+#     "width": 15,
+
+#     "snakes":
+#     [
+#     {"body": [{"y": 6, "x": 11}, {"y": 6, "x": 12}, {"y": 7, "x": 12}],
+#     "health": 98, "id": "71bc0613-00f6-4e6e-be72-4d84d19e568f",
+#     "name": ""}
+#     ],
+
+#     "height": 15
+#     }
+
+#     board_object = Board()
+#     board_object.set_dimensions(board["width"], board["height"])
+#     board_object.update(board["food"], board["snakes"])
+
+#     board_object.avoid.extend([Cell(1, 0), Cell(1, 1), Cell(1, 2), Cell(0, 3)])
+
+#     board_object.current_head = Cell(0, 0)
+
+#     count = board_object.count_connected_comps(Cell(0, 1))
+#     print(count)
+#     #path = board_object.astar({"y": 2, "x": 3}, board_object.food_list[1], board_object.avoid)
+
+#     # for p in path:
+#     #     print(p)
+
+# if __name__ == "__main__":
+#     main()

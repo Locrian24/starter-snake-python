@@ -63,7 +63,7 @@ def move():
             snake AI must choose a direction to move in.
     """
 
-    bord.update(data["board"]["food"], data["board"]["snakes"])
+    bord.update(data["board"]["food"], data["board"]["snakes"], data["you"]["body"][0])
     snek.update(data["you"]["body"], data["you"]["health"])
 
     direction = snek.move()
@@ -79,6 +79,8 @@ def end():
     TODO: If your snake AI was stateful,
         clean up any stateful objects here.
     """
+
+    print(snek.health)
 
     return end_response()
 

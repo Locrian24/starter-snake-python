@@ -13,6 +13,10 @@ class Cell:
         return "[{}, {}]".format(self.x, self.y)
 
     def __eq__(self, other):
+        if not other:
+            print("ERROR")
+            return False
+
         return self.x == other.x and self.y == other.y
 
     def man_distance(self, goal):
@@ -67,6 +71,9 @@ def astar(start, end, avoid, dimensions):
         #remove it fro the open list
         open_list.remove(current)
         #if we added the destination to the closed list, we've found a path
+        if not end:
+            print("HELP")
+
         if current == end:
             #break the loop
             return reconstruct_path(current, start)
@@ -97,3 +104,23 @@ def astar(start, end, avoid, dimensions):
             neighbour.g = current.g + 1
             neighbour.h = neighbour.eu_distance(end)
             neighbour.f = neighbour.g + neighbour.h
+    
+    def flood_fill(self, current, num_safe, max_len, visited, avoid):
+        """
+            Determine available spaces as well as shutting off any
+            cells with one walkable neighbour (unvisited), effectively
+            blocking off dead ends
+        """
+        if not visited:
+            visited = []
+
+        if num_safe >= max_len:
+            return num_safe
+
+        if current not in visited:
+            visited.append(current)
+            num_safe += 1
+            n = len(current.get_neighbours(avoid)
+            for n in current.get_neighbours(avoid)
+        
+        
