@@ -86,10 +86,10 @@ class Board:
         for enemy in self.enemies:
             enemy_head = Cell(enemy["body"][0]["x"], enemy["body"][0]["y"])
             enemy_dist = enemy_head.man_distance(dest)
-            if enemy_dist <= min_enemydist:
+            if enemy_dist < min_enemydist:
                 min_enemydist = enemy_dist
 
-        if self.current_head.man_distance(dest) < min_enemydist:
+        if self.current_head.man_distance(dest) <= min_enemydist:
             return True
         else:
             return False
