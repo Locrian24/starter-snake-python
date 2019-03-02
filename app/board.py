@@ -112,19 +112,19 @@ class Board:
         closest_food = self.__get_closest_food(head, food_available)
 
         if snake.length <= 10: #and food is reachable and safe
-            if self.pos_is_sate(closest_food):
+            if closest_food and self.pos_is_sate(closest_food):
                 action = "eat"
             else:
                 action = "surround"
         else:
             if snake.health > 50:
                 action = "surround"
-            elif self.pos_is_sate(closest_food):
+            elif closest_food and self.pos_is_sate(closest_food):
                 action = "eat"
             else:
                 action = "surround"
 
-        if snake.health < self.current_head.man_distance(closest_food) + 5:
+        if closest_food and snake.health < self.current_head.man_distance(closest_food) + 5:
             action = "eat"
 
         if action == "eat":
