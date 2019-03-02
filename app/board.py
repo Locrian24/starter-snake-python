@@ -89,7 +89,7 @@ class Board:
             if enemy_dist < min_enemydist:
                 min_enemydist = enemy_dist
 
-        if self.current_head.man_distance(dest) <= min_enemydist:
+        if self.current_head.man_distance(dest) < min_enemydist:
             return True
         else:
             return False
@@ -111,7 +111,7 @@ class Board:
 
         closest_food = self.__get_closest_food(head, food_available)
 
-        if snake.length <= 15: #and food is reachable and safe
+        if snake.length <= 7: #and food is reachable and safe
             if closest_food and self.pos_is_sate(closest_food):
                 action = "eat"
             else:
