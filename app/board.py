@@ -133,8 +133,8 @@ class Board:
             while not astar_path:
                 if not food_available:
                     action = "surround"
-                    break
-                    # astar_path = self.astar(head, tailend)
+                    #break
+                    astar_path = self.astar(head, tailend)
                 else:
                     food_available.remove(closest_food)
                     closest_food = self.__get_closest_food(head, food_available)
