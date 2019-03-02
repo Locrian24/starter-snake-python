@@ -90,13 +90,11 @@ class Board:
         if self.current_head.man_distance(dest) < min_enemydist:
             return True
         else:
-            print("Nothing is safe")
             return False
 
     def get_next_move(self, snake, danger):
 
         if danger > 5:
-            print("JHBDLKSVBSLKJ BKJSDSDB LKJSDBLK L ")
             neighbours = self.current_head.get_neighbours(self.avoid, self.dimensions)
             next_move = random.choice(neighbours)
             return [self.current_head, next_move]
@@ -112,7 +110,10 @@ class Board:
         closest_food = self.__get_closest_food(head, food_available)
 
         if snake.length <= 10: #and food is reachable and safe
-            action = "eat"
+            if self.pos_is_sate(closest_food):
+                action = "eat"
+            else:
+                action = "surround"
         else:
             if snake.health > 50:
                 action = "surround"
@@ -121,13 +122,15 @@ class Board:
             else:
                 action = "surround"
 
+        if snake.health < self.current_head.man_distance(closest_food) + 5:
+            action = "eat"
+
         if action == "eat":
             astar_path = self.astar(head, closest_food)
 
             while not astar_path:
                 if not food_available:
                     action = "surround"
-                    print("REEEEE")
                     break
                     # astar_path = self.astar(head, tailend)
                 else:
