@@ -63,7 +63,7 @@ def move():
             snake AI must choose a direction to move in.
     """
 
-    bord.update(data["board"]["food"], data["board"]["snakes"], data["you"]["body"][0], data["you"]["body"][len(data["you"]["body"]-1)])
+    bord.update(data["board"]["food"], data["board"]["snakes"], data["you"]["body"][0])
     snek.update(data["you"]["body"], data["you"]["health"])
 
     direction = snek.move()

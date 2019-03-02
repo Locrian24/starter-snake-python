@@ -49,7 +49,7 @@ class Board:
     def set_dimensions(self, width, height):
         self.dimensions = (width, height)
 
-    def update(self, foods, enemies, me_head, me_tail):
+    def update(self, foods, enemies, me_head):
         del self.food_list[:]
         del self.avoid[:]
 
@@ -65,8 +65,8 @@ class Board:
                 self.enemies.append(enemy)
 
             for body in enemy["body"]:
-                if body["x"] == me_head["x"] and body["y"] == me_head["y"]:
-                    continue
+                # if body["x"] == me_head["x"] and body["y"] == me_head["y"]:
+                #     continue
                 self.avoid.append(Cell(body["x"], body["y"]))
 
     def __get_closest_food(self, head, foods):
@@ -133,8 +133,8 @@ class Board:
             while not astar_path:
                 if not food_available:
                     action = "surround"
-                    #break
-                    astar_path = self.astar(head, tailend)
+                    break
+                    # astar_path = self.astar(head, tailend)
                 else:
                     food_available.remove(closest_food)
                     closest_food = self.__get_closest_food(head, food_available)
