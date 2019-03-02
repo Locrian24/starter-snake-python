@@ -126,14 +126,16 @@ class Board:
 
             while not astar_path:
                 if not food_available:
-                    print("PULLING TAIL")
-                    astar_path = self.astar(head, tailend)
+                    action = "surround"
+                    print("REEEEE")
+                    break
+                    # astar_path = self.astar(head, tailend)
                 else:
                     food_available.remove(closest_food)
                     closest_food = self.__get_closest_food(head, food_available)
                     astar_path = self.astar(head, closest_food)
 
-        elif action == "surround":
+        if action == "surround":
             astar_path = self.astar(head, tailend)
             if not astar_path:
                 snake.get_head()
