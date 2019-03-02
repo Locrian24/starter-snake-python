@@ -26,8 +26,11 @@ class Snake:
         """
         
 
-        next_path = self.__board.get_next_move(self)
+        next_path = self.__board.get_next_move(self, 0)
         # next_area = self.__board.count_connected_comps(next_path[1])
+
+        if not next_path:
+            next_path = self.__board.get_next_move(self, 7)
         next_move = next_path[1] - next_path[0]
         # if next_area < self.length:
         #     next_move = (-next_move[0], -next_move[1])

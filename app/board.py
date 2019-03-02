@@ -1,3 +1,5 @@
+import random
+
 class Cell:
     def __init__(self, x, y, parent=None):
         self.x, self.y = x, y
@@ -91,7 +93,14 @@ class Board:
             print("Nothing is safe")
             return False
 
-    def get_next_move(self, snake):
+    def get_next_move(self, snake, danger):
+
+        if danger > 5:
+            print("JHBDLKSVBSLKJ BKJSDSDB LKJSDBLK L ")
+            neighbours = self.current_head.get_neighbours(self.avoid, self.dimensions)
+            next_move = random.choice(neighbours)
+            return [self.current_head, next_move]
+
 
         food_available = self.food_list[:]
         head = Cell(snake.get_head()["x"], snake.get_head()["y"])
@@ -126,6 +135,8 @@ class Board:
 
         elif action == "surround":
             astar_path = self.astar(head, tailend)
+            if not astar_path:
+                snake.get_head()
 
         return astar_path
 
