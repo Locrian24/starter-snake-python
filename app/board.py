@@ -64,7 +64,7 @@ class Board:
                     enemy["body"][0]["y"] == me_head["y"]:
                 self.enemies.append(enemy)
 
-            for body in enemy["body"]:
+            for body in enemy["body"][:len(enemy["body"]) - 1]:
                 self.avoid.append(Cell(body["x"], body["y"]))
 
     def __get_closest_food(self, head, foods):
