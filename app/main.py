@@ -49,7 +49,7 @@ def start():
     # create snake and game board
     bord.set_dimensions(data["board"]["width"], data["board"]['height'])
 
-    color = "#00FF00"
+    color = "#0f0f0f"
 
     return start_response(color)
 
